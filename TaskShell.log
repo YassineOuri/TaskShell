@@ -65,3 +65,46 @@
 1730568618821:list
 1730568628137:add "Fifth Task"
 1730568631037:list
+1730808062716:taskcli list
+1730808185551:exit
+1730808569230:list
+1730808574540:taskcli list
+1730808608688:taskcli create "New Task"
+1730808618464:taskcli add "New Task"
+1730808622982:taskcli list
+1730808812724:taskcli list -d
+1730808818830:taskcli list --d
+1730808958959:taskcli create "New Task" --date 01/01/1999
+1730809056676:taskcli create "New Task" --d 01/01/2024
+1730809069905:taskcli create "New Task" --date 01/01/2024
+1730809082745:taskcli add "New Task" --d 01/01/2024
+1730809087732:taskcli list
+1730809152619:taskcli add "New Task" --d 01/01/2024 --s DONE
+1730809154950:list
+1730809159719:taskcli list
+1730809426275:taskcli add "New"
+1730809429751:taskcli list
+1730809484805:taskcli add "Newer"
+1730809488890:taskcli list
+1730809512982:taskcli list --date 05/11/2024
+1730809776989:taskcli update
+1730809855364:taskcli update 1245558 New Description
+1730809870112:taskcli update 1245558 "New Description"
+1730810976590:taskcli list --d
+1730810995884:tascli update 970c9e6f-cbdb-4139-b0c1-b246cb5afc11 "Newer Task I mean"
+1730811010849:taskcli update 970c9e6f-cbdb-4139-b0c1-b246cb5afc11 "Newer Task I mean"
+1730811050194:stacktrace
+1730811162205:taskcli add "New Task"
+1730811167174:taskcli list -d
+1730811187198:taskcli list --d
+1730811212445:taskcli update 6845552f-54ab-4b25-ac06-131dea9c5706 "Newer Task"
+1730811222002:taskcli list --d
+1730812043431:taskcli list -d
+1730812048019:taskcli list --d
+1730812065620:taskcli mark-done 6845552f-54ab-4b25-ac06-131dea9c5706
+1730812071515:taskcli list
+1730812400962:taskcli add "Task To Delete"
+1730812405420:taskcli list --d
+1730812415948:taskcli delete d73692c8-4413-4003-901e-7ed0e0bb8c8c
+1730812421566:taskcli list --d
+1730812427791:taskcli list

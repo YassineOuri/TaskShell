@@ -1,7 +1,9 @@
 package com.example.TaskShell.models;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.UUID;
 
 
@@ -19,7 +21,8 @@ public class Task {
         this.id = UUID.randomUUID();
         this.description = description;
         this.status = TaskStatus.TODO;
-        this.date = LocalDate.now().toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        this.date = LocalDate.now().format(formatter);
     }
 
      // Task with no status
