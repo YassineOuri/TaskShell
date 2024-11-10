@@ -7,7 +7,7 @@ import java.util.Formatter;
 import java.util.UUID;
 
 
-public class Task {
+public class Task implements Cloneable {
     private UUID id;
     private String description;
     private TaskStatus status;
@@ -31,6 +31,10 @@ public class Task {
         this.description = description;
         this.date = date;
         this.status = TaskStatus.TODO;
+    }
+
+    public void setNewId() {
+        this.id = UUID.randomUUID();
     }
 
     public UUID getId() {
@@ -63,5 +67,16 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public Task clone() {
+        try {
+            Task clone = (Task) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

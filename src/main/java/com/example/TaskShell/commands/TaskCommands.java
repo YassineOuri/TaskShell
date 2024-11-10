@@ -13,12 +13,11 @@ import org.springframework.shell.standard.ShellOption;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.sql.Array;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ShellComponent
@@ -38,6 +37,17 @@ public class TaskCommands {
                 "       \\ \\__\\ \\ \\__\\ \\__\\____\\_\\  \\ \\__\\\\ \\__\\ \\_______\\ \\_______\\ \\__\\\n" +
                 "        \\|__|  \\|__|\\|__|\\_________\\|__| \\|__|\\|_______|\\|_______|\\|__|\n" +
                 "                        \\|_________|                                   ");*/
+    }
+
+
+    private String getTodayDate() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return LocalDate.now().format(dateTimeFormatter);
+    }
+
+    private String getTomorrowDate() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return LocalDate.now().plusDays(1).format(dateTimeFormatter);
     }
 
     private StringBuilder displaySimpleList(List<Task> tasks) {
@@ -98,9 +108,8 @@ public class TaskCommands {
 
 
             if(!all && Objects.equals(date, "no date")) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                String today = LocalDate.now().format(dateTimeFormatter);
-                tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), today)).toList();
+
+                tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), getTodayDate())).toList();
                 if (tasks.isEmpty()) {
                     return "No tasks are created today";
                 }
@@ -321,7 +330,56 @@ public class TaskCommands {
     }
 
     @ShellMethod(key = "move-todo", value = "Moves Undone tasks from a date to a date. If no dates are specified it moves tasks from today to tomorrow")
-   public String moveTodoTasks() {
-        return "Task moved";
+   public String moveTodoTasks(
+           @ShellOption(value = "from" , defaultValue = "no date", help = "The date from which the tasks will be moved") String from,
+           @ShellOption(value = "to" , defaultValue = "no date", help = "The date which the moved tasks will be placed") String to
+    ) throws IOException {
+        List<Task> tasks;
+
+        ObjectMapper mapper = new ObjectMapper();
+        String fromDate = !Objects.equals(from, "no date") ? from : getTodayDate();
+        String toDate = !Objects.equals(to, "no date") ? to : getTomorrowDate();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.printf("Move tasks from %s to %s ? (y/n)", fromDate, toDate);
+        String confirmation = scanner.nextLine().trim().toLowerCase();
+
+        if(confirmation.equals("y") || confirmation.equals("yes")) {
+            try {
+                if(LocalDate.parse(fromDate, dateTimeFormatter).isAfter(LocalDate.parse(toDate, dateTimeFormatter))) {
+                    return "'From' date should be earlier than 'To' date";
+                }
+
+                tasks = mapper.readValue(tasksFile, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
+                List<Task> fromTasks = tasks.stream().filter(
+                        task -> Objects.equals(task.getDate(), fromDate) && Objects.equals(task.getStatus(), TaskStatus.TODO)
+                ).toList();
+
+                // List<Task> clonedList = new ArrayList<Task>(fromTasks.size());
+                for (Task tastToClone : fromTasks) {
+                    Task clonedTask = tastToClone.clone();
+                    clonedTask.setDate(toDate);
+                    clonedTask.setNewId();
+                    tasks.add(clonedTask);
+                }
+                mapper.writer().withDefaultPrettyPrinter().writeValue(tasksFile, tasks);
+
+
+                return "Tasks moved successfully";
+            } catch (DateTimeParseException e) {
+                return "Invalid date format";
+            } catch (IOException e) {
+                return "An error occurred while accessing tasks file";
+            }
+
+        }
+
+        else {
+            return "Operation Cancelled";
+        }
+
+
+
     }
 }
