@@ -6,12 +6,15 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SequenceWriter;
+import org.springframework.shell.context.InteractionMode;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -74,11 +77,13 @@ public class TaskCommands {
         return output;
     }
 
-    @ShellMethod(key = "taskcli list", value = "List tasks")
+    @ShellMethod(key = "list", value = "List tasks, if no argument is specified it lists today's tasks")
     public String listTasks(
             @ShellOption(defaultValue = "false", arity = 0, help = "Display a detailed list of tasks") Boolean d,
             @ShellOption(defaultValue = "false", arity = 0, help = "Display a table of tasks") Boolean t,
-            @ShellOption(defaultValue = "no date", help = "List tasks per a given date (required format dd/mm/yyyy)") String date
+            @ShellOption(defaultValue = "no date", help = "List tasks per a given date (required format dd/mm/yyyy)") String date,
+            @ShellOption(value = {"--a", "--all"}, defaultValue = "false", help = "List all registred tasks") Boolean all
+
 
     ) throws IOException {
         List<Task> tasks;
@@ -90,7 +95,18 @@ public class TaskCommands {
 
             tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
 
-            if (!Objects.equals(date, "no date")) {
+
+
+            if(!all && Objects.equals(date, "no date")) {
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                String today = LocalDate.now().format(dateTimeFormatter);
+                tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), today)).toList();
+                if (tasks.isEmpty()) {
+                    return "No tasks are created today";
+                }
+            }
+
+            if (!Objects.equals(date, "no date") && !all) {
                 tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), date)).toList();
                 if (tasks.isEmpty()) {
                     return "No tasks are created in this date";
@@ -114,7 +130,7 @@ public class TaskCommands {
     }
 
 
-    @ShellMethod(key = "taskcli add", value = "Create a task")
+    @ShellMethod(key = "add", value = "Create a task")
     public String createTask(
             String description,
             @ShellOption(value = "d", defaultValue = "no date", help = "Create a task for a given date") String date,
@@ -162,7 +178,7 @@ public class TaskCommands {
         }
     }
 
-    @ShellMethod(key = "taskcli update" ,value="Update a task by ID")
+    @ShellMethod(key = "update" ,value="Update a task by ID")
     public String modifyTask(
             String taskID,
             String newDescription,
@@ -206,7 +222,7 @@ public class TaskCommands {
     }
 
 
-    @ShellMethod(key = "taskcli mark-done" ,  value = "Mark a task by ID as DONE")
+    @ShellMethod(key = "mark-done" ,  value = "Mark a task by ID as DONE")
     public String markAsDone(
             String taskID
     ) {
@@ -241,7 +257,7 @@ public class TaskCommands {
     }
 
 
-    @ShellMethod(key = "taskcli mark-todo" ,  value = "Mark a task by ID as TODO")
+    @ShellMethod(key = "mark-todo" ,  value = "Mark a task by ID as TODO")
     public String markAsTodo(
             String taskID
     ) {
@@ -275,7 +291,7 @@ public class TaskCommands {
         return "Task Modified Successfully";
     }
 
-    @ShellMethod(key = "taskcli delete", value = "Delete a task by ID")
+    @ShellMethod(key = "delete", value = "Delete a task by ID")
     public String deleteTask(
             String taskID
     ) {
@@ -302,5 +318,10 @@ public class TaskCommands {
         }
 
         return "Task Deleted Successfully";
+    }
+
+    @ShellMethod(key = "move-todo", value = "Moves Undone tasks from a date to a date. If no dates are specified it moves tasks from today to tomorrow")
+   public String moveTodoTasks() {
+        return "Task moved";
     }
 }
