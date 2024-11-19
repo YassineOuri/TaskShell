@@ -1,11 +1,16 @@
 package com.example.TaskShell.commands;
 
+import com.example.TaskShell.exceptions.EmplyTaskListException;
+import com.example.TaskShell.models.ANSIColors;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
+import com.example.TaskShell.services.ListService;
+import com.example.TaskShell.utils.DateUtils;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SequenceWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.context.InteractionMode;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -25,6 +30,8 @@ public class TaskCommands {
 
     String homeDir = System.getProperty("user.home");
     File tasksFile = new File(homeDir + "/tasks.json");
+
+    ListService listService = new ListService();
 
 
     public TaskCommands() throws IOException {
@@ -50,11 +57,15 @@ public class TaskCommands {
         return LocalDate.now().plusDays(1).format(dateTimeFormatter);
     }
 
-    private StringBuilder displaySimpleList(List<Task> tasks) {
+    private StringBuilder displaySimpleList(List<Task> tasks, String date) {
         StringBuilder output = new StringBuilder();
+        output.append(
+                ANSIColors.greenText("╔═══════════════════════════════════════════════════════════════╗\n" +
+                "║                      Tasks Due : "+date+"                   ║\n" +
+                "╚═══════════════════════════════════════════════════════════════╝\n"));
         for (Task task : tasks) {
-            String checkString = task.getStatus() == TaskStatus.TODO ? "[ ]" : "[x]";
-            String taskOutput = checkString + " " + task.getDescription() + " - Due: " + task.getDate() + "\n";
+            String checkString = task.getStatus() == TaskStatus.TODO ? ANSIColors.redText("[ ]") : ANSIColors.greenText("[x]");
+            String taskOutput = checkString + " " + task.getDescription() + "\n";
             output.append(taskOutput);
         }
 
@@ -90,41 +101,21 @@ public class TaskCommands {
     @ShellMethod(key = "list", value = "List tasks, if no argument is specified it lists today's tasks")
     public String listTasks(
             @ShellOption(defaultValue = "false", arity = 0, help = "Display a detailed list of tasks") Boolean d,
-            @ShellOption(defaultValue = "false", arity = 0, help = "Display a table of tasks") Boolean t,
+            @ShellOption(value = {"--t", "--table"}, defaultValue = "false", arity = 0, help = "Display a table of tasks") Boolean t,
             @ShellOption(defaultValue = "no date", help = "List tasks per a given date (required format dd/mm/yyyy)") String date,
             @ShellOption(value = {"--a", "--all"}, defaultValue = "false", help = "List all registred tasks") Boolean all
 
 
-    ) throws IOException {
-        List<Task> tasks;
+    ) {
         ObjectMapper mapper = new ObjectMapper();
-        File file = tasksFile;
-
+        List<Task> tasks;
         try {
-
-
-            tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
-
-
-
-            if(!all && Objects.equals(date, "no date")) {
-
-                tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), getTodayDate())).toList();
-                if (tasks.isEmpty()) {
-                    return "No tasks are created today";
-                }
-            }
-
-            if (!Objects.equals(date, "no date") && !all) {
-                tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), date)).toList();
-                if (tasks.isEmpty()) {
-                    return "No tasks are created in this date";
-                }
-            }
-
+         tasks = listService.listTasks(tasksFile, all, date);
         } catch (IOException e) {
             e.printStackTrace();
-            return "An error occured while reading tasks, Try again later";
+            return ANSIColors.redText("An error occured while reading tasks, Try again later");
+        } catch (EmplyTaskListException e) {
+            return ANSIColors.redText(e.getMessage());
         }
 
         if (d) {
@@ -133,8 +124,8 @@ public class TaskCommands {
         if (t) {
             return displayTabularList(tasks).toString();
         }
-
-        return displaySimpleList(tasks).toString();
+        String dueDate = !Objects.equals(date, "no date") ? date : DateUtils.getTodayDate();
+        return displaySimpleList(tasks,dueDate).toString();
 
     }
 
@@ -142,8 +133,8 @@ public class TaskCommands {
     @ShellMethod(key = "add", value = "Create a task")
     public String createTask(
             String description,
-            @ShellOption(value = "d", defaultValue = "no date", help = "Create a task for a given date") String date,
-            @ShellOption(value = "s",defaultValue = "TODO", help = "Create a task with given status") String status
+            @ShellOption(value = {"--d", "--date"}, defaultValue = "no date", help = "Create a task for a given date") String date,
+            @ShellOption(value = {"--s", "--status"},defaultValue = "TODO", help = "Create a task with given status") String status
     ) {
         File file = tasksFile;
         ObjectMapper mapper = new ObjectMapper();
@@ -180,10 +171,10 @@ public class TaskCommands {
 
             }
 
-            return "Task created successfully";
+            return ANSIColors.greenText("✔ Task created successfully");
         } catch (IOException e) {
             e.printStackTrace();
-            return "An error occurred while creating your task! Try again later";
+            return ANSIColors.redText("An error occurred while creating your task! Try again later");
         }
     }
 
@@ -219,10 +210,6 @@ public class TaskCommands {
                 mapper.writer().withDefaultPrettyPrinter().writeValue(tasksFile, tasks);
 
             }
-        } catch (StreamReadException e) {
-            throw new RuntimeException(e);
-        } catch (DatabindException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -254,10 +241,6 @@ public class TaskCommands {
                 mapper.writer().withDefaultPrettyPrinter().writeValue(tasksFile, tasks);
 
             }
-        } catch (StreamReadException e) {
-            throw new RuntimeException(e);
-        } catch (DatabindException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -289,10 +272,6 @@ public class TaskCommands {
                 mapper.writer().withDefaultPrettyPrinter().writeValue(tasksFile, tasks);
 
             }
-        } catch (StreamReadException e) {
-            throw new RuntimeException(e);
-        } catch (DatabindException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -318,10 +297,6 @@ public class TaskCommands {
                 mapper.writer().withDefaultPrettyPrinter().writeValue(tasksFile, newTaskList);
 
             }
-        } catch (StreamReadException e) {
-            throw new RuntimeException(e);
-        } catch (DatabindException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
