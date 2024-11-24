@@ -41,9 +41,30 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
     java -jar target/TaskShell-1.0.jar
     ```
 
-## Usage
+## Commands
 
 ### List Tasks
 
+Display list of created tasks
+
+<details><summary>List tasks due for today</summary>
+
 ```bash
-java -jar target/TaskShell-1.0.jar list
+taskcli list
+```
+</details>
+
+<details><summary>List tasks due in any specified date</summary>
+
+```bash
+taskcli list --date 24/11/2024
+```
+</details>
+
+<details><summary>List all created tasks without any filters </summary>
+
+```bash
+taskcli list --a
+```
+</details>
+
