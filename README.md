@@ -6,14 +6,18 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
 
 - List all tasks or filter by date.
 - Display tasks in simple, detailed, or tabular formats.
+- Apply filters to tasks before listing them (.e.g, By date, By status )
 - Add new tasks with customizable due dates and statuses.
-- Task data is saved in a JSON file for easy portability.
+- Task data is saved in a JSON file in device's home directory for easy portability.
+- Move undone tasks from today to tomorrow or using any dates
+- Modify task description or status
+- Delete tasks
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 11 or higher
+- Java 17 or higher
 - Maven
 
 ### Installation
