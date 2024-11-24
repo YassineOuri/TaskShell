@@ -21,28 +21,6 @@ public class ListService {
 
 
 
-    public List<Task> listTasks(File file, Boolean all, String date) throws IOException, EmplyTaskListException {
-        List<Task> tasks;
-        ObjectMapper mapper = new ObjectMapper();
 
-        tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
-
-
-        if(!all && Objects.equals(date, "no date")) {
-
-            tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), DateUtils.getTodayDate())).toList();
-            if (tasks.isEmpty()) {
-                throw new EmplyTaskListException("No tasks are created for today");
-            }
-        }
-
-        if (!Objects.equals(date, "no date") && !all) {
-            tasks = tasks.stream().filter(task -> Objects.equals(task.getDate(), date)).toList();
-            if (tasks.isEmpty()) {
-                throw new EmplyTaskListException("No Tasks are created for this date");
-            }
-        }
-        return tasks;
-    }
 }
 

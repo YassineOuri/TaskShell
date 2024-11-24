@@ -14,7 +14,7 @@ public final class DateUtils {
         return LocalDate.now().format(dateTimeFormatter);
     }
 
-    private String getTomorrowDate() {
+    public static String getTomorrowDate() {
         return LocalDate.now().plusDays(1).format(dateTimeFormatter);
     }
 }
