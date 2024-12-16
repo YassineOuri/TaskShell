@@ -1,6 +1,5 @@
 package com.example.TaskShell.commands;
 
-import com.example.TaskShell.exceptions.EmplyTaskListException;
 import com.example.TaskShell.models.ANSIColors;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
@@ -13,12 +12,9 @@ import org.springframework.shell.standard.ShellOption;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 /**
  * Command-line interface for managing tasks using Spring Shell.
@@ -32,10 +28,8 @@ public class TaskCommands {
 
     /**
      * Initializes the task commands and ensures the tasks file exists.
-     *
-     * @throws IOException if an I/O error occurs.
      */
-    public TaskCommands() throws IOException {
+    public TaskCommands() {
         try {
             if (tasksFile.createNewFile()) {
                 System.out.println(ANSIColors.greenText("[√]") + " Tasks file created");
@@ -55,8 +49,6 @@ public class TaskCommands {
      * @param date     Filter tasks by a specific date.
      * @param all      Whether to list all tasks.
      * @return A string representation of the tasks.
-     * @throws IOException               if an I/O error occurs.
-     * @throws EmplyTaskListException if no tasks are found.
      */
     @ShellMethod(key = "list", value = "List tasks, if no argument is specified it lists today's tasks")
     public String listTasks(
@@ -64,7 +56,7 @@ public class TaskCommands {
             @ShellOption(value = {"--t", "--table"}, defaultValue = "false") Boolean table,
             @ShellOption(defaultValue = "no date") String date,
             @ShellOption(value = {"--a", "--all"}, defaultValue = "false") Boolean all
-    ) throws IOException, EmplyTaskListException {
+    ) {
         return taskService.listTasks(all, detailed, table, date, tasksFile);
     }
 
@@ -135,7 +127,7 @@ public class TaskCommands {
      */
     @ShellMethod(key = "mark-done", value = "Mark a task by ID as DONE")
     public String markAsDone(String taskID) {
-        return updateTaskStatus(taskID, TaskStatus.DONE);
+        return taskService.updateTaskStatus(tasksFile, taskID, TaskStatus.DONE);
     }
 
     /**
@@ -146,7 +138,7 @@ public class TaskCommands {
      */
     @ShellMethod(key = "mark-todo", value = "Mark a task by ID as TODO")
     public String markAsTodo(String taskID) {
-        return updateTaskStatus(taskID, TaskStatus.TODO);
+        return taskService.updateTaskStatus(tasksFile,taskID, TaskStatus.TODO);
     }
 
     /**
@@ -176,68 +168,29 @@ public class TaskCommands {
      * @param from The source date. If no date is specified it defaults to the current date
      * @param to   The target date. If no date is specified it defaults to tomorrow
      * @return A success message or an error message if an error occurs.
-     * @throws IOException if an I/O error occurs.
      */
     @ShellMethod(key = "move-todo", value = "Moves Undone tasks from a date to a date")
     public String moveTodoTasks(
             @ShellOption(value = "from", defaultValue = "no date") String from,
             @ShellOption(value = "to", defaultValue = "no date") String to
-    ) throws IOException {
+    ) {
         String fromDate = !Objects.equals(from, "no date") ? from : DateUtils.getTodayDate();
         String toDate = !Objects.equals(to, "no date") ? to : DateUtils.getTomorrowDate();
 
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            if (LocalDate.parse(fromDate, formatter).isAfter(LocalDate.parse(toDate, formatter))) {
-                return "'From' date should be earlier than 'To' date";
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            List<Task> tasks = mapper.readValue(tasksFile, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
-            List<Task> fromTasks = tasks.stream()
-                    .filter(task -> Objects.equals(task.getDate(), fromDate) && task.getStatus() == TaskStatus.TODO)
-                    .toList();
-
-            for (Task task : fromTasks) {
-                Task clonedTask = task.clone();
-                clonedTask.setDate(toDate);
-                clonedTask.setNewId();
-                tasks.add(clonedTask);
-            }
-
-            mapper.writerWithDefaultPrettyPrinter().writeValue(tasksFile, tasks);
-            return "Tasks moved successfully";
+            return ANSIColors.greenText(taskService.moveTodo(
+                    tasksFile,
+                    fromDate,
+                    toDate)
+            );
         } catch (DateTimeParseException e) {
-            return "Invalid date format";
+            return ANSIColors.redText("Please specify a valid date with format day/month/year");
+        }
+        catch (IOException e) {
+            return ANSIColors.redText("An error occurred while moving tasks");
         }
     }
 
-    /**
-     * Updates the status of a task.
-     *
-     * @param taskID The ID of the task.
-     * @param status The new status.
-     * @return A success message or an error message if the task is not found.
-     */
-    private String updateTaskStatus(String taskID, TaskStatus status) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<Task> tasks = mapper.readValue(tasksFile, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
 
-            Task taskToUpdate = tasks.stream()
-                    .filter(task -> Objects.equals(task.getId().toString(), taskID))
-                    .findFirst()
-                    .orElse(null);
 
-            if (taskToUpdate == null) {
-                return "Task with ID " + taskID + " doesn't exist";
-            }
-
-            taskToUpdate.setStatus(status);
-            mapper.writerWithDefaultPrettyPrinter().writeValue(tasksFile, tasks);
-            return "Task status updated successfully";
-        } catch (IOException e) {
-            return "An error occurred while updating the task status";
-        }
-    }
 }

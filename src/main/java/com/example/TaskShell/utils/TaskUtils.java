@@ -43,7 +43,7 @@ public class TaskUtils {
         for (Task task : tasks) {
             String checkString = task.getStatus() == TaskStatus.TODO
                     ? ANSIColors.redText("[ ]")
-                    : ANSIColors.greenText("[√]");
+                    : ANSIColors.greenText("[x]");
             output.append(String.format("%s %s%n", checkString, task.getDescription()));
         }
 
@@ -86,7 +86,7 @@ public class TaskUtils {
 
         for (Task task : tasks) {
             output.append(String.format("""
-                    Task ID: %d
+                    Task ID: %s
                     Description: %s
                     Status: %s
                     Date: %s

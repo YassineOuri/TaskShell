@@ -1,6 +1,6 @@
 package com.example.TaskShell.services;
 
-import com.example.TaskShell.exceptions.EmplyTaskListException;
+import com.example.TaskShell.exceptions.EmptyTaskListException;
 import com.example.TaskShell.models.ANSIColors;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -31,8 +34,6 @@ public class TaskService {
      * @param date       the date to filter tasks
      * @param file       the file containing tasks
      * @return a formatted string representation of tasks
-     * @throws IOException               if an error occurs during file operations
-     * @throws EmplyTaskListException    if no tasks are found for the specified conditions
      */
     public String listTasks(boolean displayAll, boolean isDetailed, boolean isTable, String date, File file) {
         try {
@@ -50,7 +51,7 @@ public class TaskService {
                 String dueDate = Objects.equals(date, "no date") ? DateUtils.getTodayDate() : date;
                 return TaskUtils.displaySimpleList(tasks, dueDate).toString();
             }
-        } catch (EmplyTaskListException e) {
+        } catch (EmptyTaskListException e) {
             return ANSIColors.redText(e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,9 +105,9 @@ public class TaskService {
      * @param displayAll whether to display all tasks
      * @param date       the date to filter tasks
      * @return a filtered list of tasks
-     * @throws EmplyTaskListException if no tasks match the filter conditions
+     * @throws EmptyTaskListException if no tasks match the filter conditions
      */
-    private List<Task> filterTasks(List<Task> tasks, boolean displayAll, String date) throws EmplyTaskListException {
+    private List<Task> filterTasks(List<Task> tasks, boolean displayAll, String date) throws EmptyTaskListException {
         if (!displayAll) {
             if (Objects.equals(date, "no date")) {
                 tasks = tasks.stream()
@@ -119,7 +120,7 @@ public class TaskService {
             }
 
             if (tasks.isEmpty()) {
-                throw new EmplyTaskListException("No tasks found for the specified date.");
+                throw new EmptyTaskListException("No tasks found for the specified date.");
             }
         }
         return tasks;
@@ -165,4 +166,67 @@ public class TaskService {
             fileWriter.write(']');
         }
     }
+
+
+
+    /**
+     * Updates the status of a task.
+     *
+     * @param taskID The ID of the task.
+     * @param status The new status.
+     * @return A success message or an error message if the task is not found.
+     */
+    public String updateTaskStatus(File file, String taskID, TaskStatus status) {
+        try {
+            List<Task> tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
+
+            Task taskToUpdate = tasks.stream()
+                    .filter(task -> Objects.equals(task.getId().toString(), taskID))
+                    .findFirst()
+                    .orElse(null);
+
+            if (taskToUpdate == null) {
+                return "Task with ID " + taskID + " doesn't exist";
+            }
+
+            taskToUpdate.setStatus(status);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, tasks);
+            return "Task status updated successfully";
+        } catch (IOException e) {
+            return "An error occurred while updating the task status";
+        }
+    }
+
+    public String moveTodo(File file, String from, String to) throws IOException, DateTimeParseException {
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.printf("Do you want to move undone tasks from %s to %s? (y/n): ", from, to);
+        String response = scanner.nextLine().toLowerCase().trim();
+        if(!Arrays.asList("y", "yes", "Yes").contains(response)) {
+            return "Aborted";
+        }
+
+         if (LocalDate.parse(from, DateUtils.dateTimeFormatter).isAfter(LocalDate.parse(to, DateUtils.dateTimeFormatter))) {
+                return "'From' date should be earlier than 'To' date";
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<Task> tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
+            List<Task> fromTasks = tasks.stream()
+                    .filter(task -> Objects.equals(task.getDate(), from) && task.getStatus() == TaskStatus.TODO)
+                    .toList();
+
+            for (Task task : fromTasks) {
+                Task clonedTask = task.clone();
+                clonedTask.setDate(to);
+                clonedTask.setNewId();
+                tasks.add(clonedTask);
+            }
+
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, tasks);
+            return "Tasks moved successfully";
+
+    }
+
+
 }
