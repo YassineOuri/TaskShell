@@ -36,8 +36,10 @@ jobs:
             tags: |
               ${{ secrets.DOCKER_USERNAME }}/taskshell:latest
               ${{ secrets.DOCKER_USERNAME }}/taskshell:${{ github.sha }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: Taskshell
-          path: target/*.jar
+          files: |
+            target/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
