@@ -93,6 +93,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>taskshell-app</finalName>
 	</build>
 
 </project>
