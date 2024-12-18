@@ -22,14 +22,18 @@ import java.util.Objects;
 @ShellComponent
 public class TaskCommands {
 
-//    private final String homeDir = System.getProperty("user.home");
-    private final File tasksFile = new File("tasks.json");
+    private final String homeDir = System.getProperty("user.home", ".");
+    private final File tasksFile = new File(homeDir, "tasks.json");
     private final TaskService taskService = new TaskService();
+
+
+
 
     /**
      * Initializes the task commands and ensures the tasks file exists.
      */
     public TaskCommands() {
+
         try {
             if (tasksFile.createNewFile()) {
                 System.out.println(ANSIColors.greenText("[√]") + " Tasks file created");
