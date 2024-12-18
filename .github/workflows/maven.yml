@@ -20,18 +20,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-
       - name: Build with Maven
         run: mvn clean verify
-      - name : Build and push docker image
-        uses : mr-smithers-excellent/docker-build-push@v5
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          image : yassineouri/taskshell-app
-          tags : latest
-          registry : docker.io
-          dockerfile : DockerFile
-          username : ${{ secrets.DOCKER_USERNAME }}
-          password : ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+            context: .
+            push: true
+            tags: |
+              ${{ secrets.DOCKERHUB_USERNAME }}/taskshell:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/taskshell:${{ github.sha }}
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
