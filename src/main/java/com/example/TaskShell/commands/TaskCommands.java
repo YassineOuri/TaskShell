@@ -22,8 +22,8 @@ import java.util.Objects;
 @ShellComponent
 public class TaskCommands {
 
-    private final String homeDir = System.getProperty("user.home");
-    private final File tasksFile = new File(homeDir + "/tasks.json");
+//    private final String homeDir = System.getProperty("user.home");
+    private final File tasksFile = new File("tasks.json");
     private final TaskService taskService = new TaskService();
 
     /**
