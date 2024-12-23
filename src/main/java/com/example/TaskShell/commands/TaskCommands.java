@@ -43,6 +43,13 @@ public class TaskCommands {
         } catch (SecurityException e) {
             System.out.println(ANSIColors.redText("Access denied when trying to write to file"));
         }
+
+        System.out.println(" _____         _     ____  _          _ _ \n" +
+                "|_   _|_ _ ___| | __/ ___|| |__   ___| | |\n" +
+                "  | |/ _` / __| |/ /\\___ \\| '_ \\ / _ \\ | |\n" +
+                "  | | (_| \\__ \\   <  ___) | | | |  __/ | |\n" +
+                "  |_|\\__,_|___/_|\\_\\|____/|_| |_|\\___|_|_|\n" +
+                "\n");
     }
 
     /**
