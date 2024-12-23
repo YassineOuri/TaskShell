@@ -13,14 +13,20 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
 - Modify task description or status
 - Delete tasks
 
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Java 17 or higher
 - Maven
 
-### Installation
+## Installation
+You can use Docker to quickly try out `jira-cli`.
+ ```bash
+ docker run -it --rm yassineouri/taskshell:latest
+ ```
+
+
+
+## Developement
 
 1. **Clone the repository:**
 
@@ -41,7 +47,7 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
     java -jar target/TaskShell-1.0.jar
     ```
 
-## Commands
+## Usage
 
 ### List Tasks
 
