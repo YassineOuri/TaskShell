@@ -38,12 +38,15 @@ public class TaskService {
      */
     public String listTasks(boolean displayAll, boolean isDetailed, boolean isTable, String date, File file) {
         try {
-            List<Task> tasks = readTasksFromFile(file);
 
-            if(tasks.isEmpty()) {
+            if(file.length() == 0) {
                 return ANSIColors.redText("There are no tasks registered yet ! \n" +
                         "Add new tasks using add command");
             }
+
+            List<Task> tasks = readTasksFromFile(file);
+
+
 
             // Filter tasks based on date conditions
             tasks = filterTasks(tasks, displayAll, date);
