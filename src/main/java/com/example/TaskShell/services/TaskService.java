@@ -181,8 +181,7 @@ public class TaskService {
             taskDate = DateUtils.getTodayDate();
         }
 
-        System.out.println(tomorrow);
-        System.out.println(taskDate);
+
 
         newTask.setDate(taskDate);
 
