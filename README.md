@@ -16,7 +16,7 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
 
 
 ## Installation
-You can use Docker to quickly try out `jira-cli`.
+You can use Docker to quickly try out `taskshell`.
  ```bash
  docker run -it --rm yassineouri/taskshell:latest
  ```

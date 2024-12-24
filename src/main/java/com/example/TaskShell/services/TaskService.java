@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
@@ -38,6 +39,11 @@ public class TaskService {
     public String listTasks(boolean displayAll, boolean isDetailed, boolean isTable, String date, File file) {
         try {
             List<Task> tasks = readTasksFromFile(file);
+
+            if(tasks.isEmpty()) {
+                return ANSIColors.redText("There are no tasks registered yet ! \n" +
+                        "Add new tasks using add command");
+            }
 
             // Filter tasks based on date conditions
             tasks = filterTasks(tasks, displayAll, date);
