@@ -64,11 +64,12 @@ public class TaskCommands {
     @ShellMethod(key = "list", value = "List tasks, if no argument is specified it lists today's tasks")
     public String listTasks(
             @ShellOption(value = {"--d", "--detailed"}, defaultValue = "false") Boolean detailed,
-            @ShellOption(value = {"--t", "--table"}, defaultValue = "false") Boolean table,
+            @ShellOption(value = {"--tab", "--table"}, defaultValue = "false") Boolean table,
             @ShellOption(defaultValue = "no date") String date,
+            @ShellOption(value = "--t", defaultValue = "false") boolean tomorrow,
             @ShellOption(value = {"--a", "--all"}, defaultValue = "false") Boolean all
     ) {
-        return taskService.listTasks(all, detailed, table, date, tasksFile);
+        return taskService.listTasks(all, detailed, table,tomorrow, date , tasksFile);
     }
 
     /**
@@ -83,9 +84,10 @@ public class TaskCommands {
     public String createTask(
             String description,
             @ShellOption(value = {"--d", "--date"}, defaultValue = "no date") String date,
-            @ShellOption(value = {"--s", "--status"}, defaultValue = "TODO") String status
+            @ShellOption(value = {"--s", "--status"}, defaultValue = "TODO") String status,
+            @ShellOption(value = "--t", defaultValue = "false") boolean tomorrow
     ) {
-        taskService.addNewTask(tasksFile, description, date, status);
+        taskService.addNewTask(tasksFile, description, date, status, tomorrow);
         return ANSIColors.greenText("[√] Task created successfully");
     }
 

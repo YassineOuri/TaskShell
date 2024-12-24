@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ public class TaskService {
      * @param file       the file containing tasks
      * @return a formatted string representation of tasks
      */
-    public String listTasks(boolean displayAll, boolean isDetailed, boolean isTable, String date, File file) {
+    public String listTasks(boolean displayAll, boolean isDetailed, boolean isTable, boolean tomorrow, String date, File file) {
         try {
 
             if(file.length() == 0) {
@@ -49,7 +50,7 @@ public class TaskService {
 
 
             // Filter tasks based on date conditions
-            tasks = filterTasks(tasks, displayAll, date);
+            tasks = filterTasks(tasks, displayAll, date, tomorrow);
 
             // Format tasks based on the desired output style
             if (isDetailed) {
@@ -76,9 +77,9 @@ public class TaskService {
      * @param date        the due date of the new task
      * @param status      the status of the new task
      */
-    public void addNewTask(File file, String description, String date, String status) {
+    public void addNewTask(File file, String description, String date, String status, boolean tomorrow) {
         try (FileWriter fileWriter = new FileWriter(file, true)) {
-            Task newTask = createTask(description, date, status);
+            Task newTask = createTask(description, date, status, tomorrow);
 
             if (file.length() == 0) {
                 // File is empty, start a new JSON array
@@ -116,17 +117,44 @@ public class TaskService {
      * @return a filtered list of tasks
      * @throws EmptyTaskListException if no tasks match the filter conditions
      */
-    private List<Task> filterTasks(List<Task> tasks, boolean displayAll, String date) throws EmptyTaskListException {
+    private List<Task> filterTasks(List<Task> tasks, boolean displayAll, String date, boolean tomorrow) throws EmptyTaskListException {
         if (!displayAll) {
-            if (Objects.equals(date, "no date")) {
+
+            if(tomorrow) {
                 tasks = tasks.stream()
-                        .filter(task -> Objects.equals(task.getDate(), DateUtils.getTodayDate()))
-                        .toList();
-            } else {
-                tasks = tasks.stream()
-                        .filter(task -> Objects.equals(task.getDate(), date))
+                        .filter(task -> Objects.equals(task.getDate(), DateUtils.getTomorrowDate()))
                         .toList();
             }
+            else {
+                switch (date) {
+                    case "no date" -> {
+                        {
+                            tasks = tasks.stream()
+                                    .filter(task -> Objects.equals(task.getDate(), DateUtils.getTodayDate()))
+                                    .toList();
+                        }
+                        ;
+                    }
+                    case "tomorrow" -> {
+                        {
+                            tasks = tasks.stream()
+                                    .filter(task -> Objects.equals(task.getDate(), DateUtils.getTomorrowDate()))
+                                    .toList();
+                        }
+                        ;
+                    }
+                    default -> {
+                        {
+                            tasks = tasks.stream()
+                                    .filter(task -> Objects.equals(task.getDate(), date))
+                                    .toList();
+                        }
+                        ;
+                    }
+                }
+            }
+
+
 
             if (tasks.isEmpty()) {
                 throw new EmptyTaskListException("No tasks found for the specified date.");
@@ -143,11 +171,22 @@ public class TaskService {
      * @param status      the status of the task
      * @return the created Task
      */
-    private Task createTask(String description, String date, String status) {
+    private Task createTask(String description, String date, String status, boolean tomorrow) {
         Task newTask = new Task(description);
-        if (!Objects.equals(date, "no date")) {
-            newTask.setDate(date);
+        String taskDate = date;
+
+        if(tomorrow || Objects.equals(date, "tomorrow")) {
+            taskDate = DateUtils.getTomorrowDate();
+        } else if (Objects.equals(date, "no date")) {
+            taskDate = DateUtils.getTodayDate();
         }
+
+        System.out.println(tomorrow);
+        System.out.println(taskDate);
+
+        newTask.setDate(taskDate);
+
+
         if (!status.isEmpty()) {
             newTask.setStatus(TaskStatus.valueOf(status));
         }
