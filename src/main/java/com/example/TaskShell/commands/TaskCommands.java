@@ -1,6 +1,7 @@
 package com.example.TaskShell.commands;
 
 import com.example.TaskShell.models.ANSIColors;
+import com.example.TaskShell.models.Category;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
 import com.example.TaskShell.services.TaskService;
@@ -10,7 +11,9 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -23,9 +26,21 @@ import java.util.Objects;
 public class TaskCommands {
 
     private final String homeDir = System.getProperty("user.home", ".");
-    private final File tasksFile = new File(homeDir, "tasks.json");
+    private final File tasksFile = new File(homeDir + "/TaskShell/tasks.json");
+    private final File categoriesFile = new File(homeDir + "/TaskShell/categories.txt");
+
+
     private final TaskService taskService = new TaskService();
 
+    private void initializeStorageDirectory() {
+        File theDir = new File("/"+ homeDir +"/TaskShell");
+        if (!theDir.exists()){
+            theDir.mkdirs();
+
+        }
+
+
+    }
 
 
 
@@ -34,12 +49,18 @@ public class TaskCommands {
      */
     public TaskCommands() {
 
+
+
         try {
-            if (tasksFile.createNewFile()) {
-                System.out.println(ANSIColors.greenText("[√]") + " Tasks file created");
-            }
+
+            initializeStorageDirectory();
+            tasksFile.createNewFile();
+            categoriesFile.createNewFile();
+
+            System.out.println(ANSIColors.greenText("[√]") + " Files are ready");
+
         } catch (IOException e) {
-            System.out.println(ANSIColors.redText("An error occurred while accessing the tasks file"));
+            System.out.println(ANSIColors.redText("An error occurred while accessing the tasks file" + e.getMessage()));
         } catch (SecurityException e) {
             System.out.println(ANSIColors.redText("Access denied when trying to write to file"));
         }
@@ -202,6 +223,32 @@ public class TaskCommands {
         catch (IOException e) {
             return ANSIColors.redText("An error occurred while moving tasks");
         }
+    }
+
+
+    @ShellMethod(key = "category add", value = "Creates a new category")
+    public String createCategory(
+            String name
+    ) throws IOException {
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(categoriesFile, true));
+            if(categoriesFile.length() == 0) {
+                writer.write(name);
+            }
+            else {
+                writer.newLine();
+                writer.append(name);
+
+            }
+
+            writer.close();
+
+            return ANSIColors.greenText("[√] Category created successfully");
+        } catch (IOException e) {
+            return ANSIColors.redText("An error occurred while creating category");
+        }
+
     }
 
 
