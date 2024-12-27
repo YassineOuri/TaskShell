@@ -1,6 +1,9 @@
 package com.example.TaskShell.commands;
 
 import com.example.TaskShell.models.ANSIColors;
+import com.example.TaskShell.utils.TaskUtils;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
 import com.example.TaskShell.models.Category;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
@@ -8,6 +11,9 @@ import com.example.TaskShell.services.CategoryService;
 import com.example.TaskShell.services.TaskService;
 import com.example.TaskShell.utils.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.InfoCmp;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -239,6 +245,43 @@ public class TaskCommands {
             return categoryService.createAndInsertCategory(categoriesFile, name);
         } catch (IOException e) {
             return ANSIColors.redText("An error occurred while creating a new category !");
+        }
+    }
+
+    @ShellMethod(key = "category list", value = "Displays all categories")
+    public void displayCategories(
+    ) throws IOException {
+        int pageSize = 5;
+        int currentPage = 0;
+        Terminal terminal = TerminalBuilder.terminal();
+        LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
+
+        try {
+            List<String> categoryList =  categoryService.displayCatgeories(categoriesFile);
+
+            while (true) {
+                terminal.puts(InfoCmp.Capability.clear_screen);
+                int start = currentPage * pageSize;
+                int end = Math.min(start + pageSize, categoryList.size());
+
+                TaskUtils.printListHeader(String.format("Categories %d -> %d: ", start, end));
+                for (int i = start; i < end; i++) {
+                    System.out.println((i + 1) + ". " + categoryList.get(i));
+                }
+
+                System.out.println("\n[Press 'n' for next, 'p' for previous, 'q' to quit]");
+                String input = lineReader.readLine("Enter your choice: ").trim();
+                if ("n".equals(input) && end < categoryList.size()) {
+                    currentPage++;
+                } else if ("p".equals(input) && currentPage > 0) {
+                    currentPage--;
+                } else if ("q".equals(input)) {
+                    break;
+                }
+
+            }
+        } catch (IOException e) {
+            System.out.println(ANSIColors.redText("An error occurred while creating a new category !"));
         }
     }
 
