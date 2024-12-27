@@ -4,6 +4,7 @@ import com.example.TaskShell.models.ANSIColors;
 import com.example.TaskShell.models.Category;
 import com.example.TaskShell.models.Task;
 import com.example.TaskShell.models.TaskStatus;
+import com.example.TaskShell.services.CategoryService;
 import com.example.TaskShell.services.TaskService;
 import com.example.TaskShell.utils.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,10 +32,11 @@ public class TaskCommands {
 
 
     private final TaskService taskService = new TaskService();
+    private final CategoryService categoryService = new CategoryService();
 
     private void initializeStorageDirectory() {
-        File theDir = new File("/"+ homeDir +"/TaskShell");
-        if (!theDir.exists()){
+        File theDir = new File("/" + homeDir + "/TaskShell");
+        if (!theDir.exists()) {
             theDir.mkdirs();
 
         }
@@ -43,12 +45,10 @@ public class TaskCommands {
     }
 
 
-
     /**
      * Initializes the task commands and ensures the tasks file exists.
      */
     public TaskCommands() {
-
 
 
         try {
@@ -90,7 +90,7 @@ public class TaskCommands {
             @ShellOption(value = "--t", defaultValue = "false") boolean tomorrow,
             @ShellOption(value = {"--a", "--all"}, defaultValue = "false") Boolean all
     ) {
-        return taskService.listTasks(all, detailed, table,tomorrow, date , tasksFile);
+        return taskService.listTasks(all, detailed, table, tomorrow, date, tasksFile);
     }
 
     /**
@@ -172,7 +172,7 @@ public class TaskCommands {
      */
     @ShellMethod(key = "mark-todo", value = "Mark a task by ID as TODO")
     public String markAsTodo(String taskID) {
-        return taskService.updateTaskStatus(tasksFile,taskID, TaskStatus.TODO);
+        return taskService.updateTaskStatus(tasksFile, taskID, TaskStatus.TODO);
     }
 
     /**
@@ -199,6 +199,7 @@ public class TaskCommands {
 
     /**
      * Moves tasks from one date to another.
+     *
      * @param from The source date. If no date is specified it defaults to the current date
      * @param to   The target date. If no date is specified it defaults to tomorrow
      * @return A success message or an error message if an error occurs.
@@ -219,38 +220,26 @@ public class TaskCommands {
             );
         } catch (DateTimeParseException e) {
             return ANSIColors.redText("Please specify a valid date with format day/month/year");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return ANSIColors.redText("An error occurred while moving tasks");
         }
     }
 
-
+    /**
+     * Creates and inserts a new category
+     *
+     * @param name The name of the category
+     * @return A success message or an error message if an error occurs.
+     */
     @ShellMethod(key = "category add", value = "Creates a new category")
     public String createCategory(
             String name
-    ) throws IOException {
-
+    ) {
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(categoriesFile, true));
-            if(categoriesFile.length() == 0) {
-                writer.write(name);
-            }
-            else {
-                writer.newLine();
-                writer.append(name);
-
-            }
-
-            writer.close();
-
-            return ANSIColors.greenText("[√] Category created successfully");
+            return categoryService.createAndInsertCategory(categoriesFile, name);
         } catch (IOException e) {
-            return ANSIColors.redText("An error occurred while creating category");
+            return ANSIColors.redText("An error occurred while creating a new category !");
         }
-
     }
-
-
 
 }
