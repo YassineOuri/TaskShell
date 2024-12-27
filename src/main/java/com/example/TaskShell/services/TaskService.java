@@ -58,7 +58,8 @@ public class TaskService {
             } else if (isTable) {
                 return TaskUtils.displayTabularList(tasks).toString();
             } else {
-                String dueDate = Objects.equals(date, "no date") ? DateUtils.getTodayDate() : date;
+                String dueDate = tomorrow ? DateUtils.getTomorrowDate() :
+                        (Objects.equals(date, "no date") ? DateUtils.getTodayDate() : date);
                 return TaskUtils.displaySimpleList(tasks, dueDate).toString();
             }
         } catch (EmptyTaskListException e) {
