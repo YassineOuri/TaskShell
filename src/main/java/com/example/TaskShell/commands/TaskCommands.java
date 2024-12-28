@@ -258,6 +258,11 @@ public class TaskCommands {
 
         try {
             List<String> categoryList =  categoryService.displayCatgeories(categoriesFile);
+            if(categoryList.isEmpty()) {
+                System.out.println(ANSIColors.greenText("No categories are created yet ! \n" +
+                        "Create a new category using `category add`"));
+                return;
+            }
 
             while (true) {
                 terminal.puts(InfoCmp.Capability.clear_screen);
