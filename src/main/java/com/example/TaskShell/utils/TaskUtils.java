@@ -41,10 +41,11 @@ public class TaskUtils {
         printListHeader("Tasks Due " + date);
 
         for (Task task : tasks) {
+            String taskCategory = task.getCategory() != null ? task.getCategory() : "Other";
             String checkString = task.getStatus() == TaskStatus.TODO
                     ? ANSIColors.redText("[ ]")
                     : ANSIColors.greenText("[x]");
-            output.append(String.format("%s %s%n", checkString, task.getDescription()));
+            output.append(String.format(" %s %s: %s%n", checkString, ANSIColors.blueText(taskCategory), task.getDescription()));
         }
 
         return output;

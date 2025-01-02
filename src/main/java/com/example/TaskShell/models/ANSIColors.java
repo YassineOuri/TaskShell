@@ -14,4 +14,8 @@ public class ANSIColors {
     public static String redText(String text) {
         return ANSI_RED + text + ANSI_RESET;
     }
+
+    public static String blueText(String text) {
+        return ANSI_BLUE + text + ANSI_RESET;
+    }
 }

@@ -213,3 +213,26 @@
 1735325557648:category add category4
 1735325560664:category add category3
 1735325566263:category list
+1735820371511:list
+1735820383101:category list
+1735820761720:add "Test Task"
+1735820791209:list --d
+1735820799330:delete 9e9164d8-a9af-427e-a856-7797560a74ee
+1735820809031:add "New Task"
+1735820826473:add "New Task With Category" --c AWS
+1735822415585:list --
+1735822419548:list --d
+1735822431377:delete b1645054-26da-4cc9-974c-4e54226edbd5
+1735822436262:delete e6054b1d-d03f-4618-bf91-e0837fe1f67b
+1735822463000:add "New Task" --c AWS
+1735822473336:add "New Task" --c aws
+1735822529663:category list
+1735822554507:add "New Task" --c aws2
+1735823090653:add "New Task" --c aws4
+1735823142181:add "New Task" --c aws78
+1735823183361:add "New Task" --c aws
+1735823354329:p
+1735823362042:add "New Task" --c aws
+1735823396907:add "New Task"
+1735823412541:add "New Task" --c work
+1735823494519:list

@@ -51,6 +51,8 @@ public class TaskCommands {
     }
 
 
+
+
     /**
      * Initializes the task commands and ensures the tasks file exists.
      */
@@ -112,9 +114,11 @@ public class TaskCommands {
             String description,
             @ShellOption(value = {"--d", "--date"}, defaultValue = "no date") String date,
             @ShellOption(value = {"--s", "--status"}, defaultValue = "TODO") String status,
-            @ShellOption(value = "--t", defaultValue = "false") boolean tomorrow
-    ) {
-        taskService.addNewTask(tasksFile, description, date, status, tomorrow);
+            @ShellOption(value = "--t", defaultValue = "false") boolean tomorrow,
+            @ShellOption(value = {"--c", "--category"}, help = "Category associated with the task") String category
+    )
+    {
+        taskService.addNewTask(tasksFile, categoriesFile, description, date, status, tomorrow, category);
         return ANSIColors.greenText("[√] Task created successfully");
     }
 

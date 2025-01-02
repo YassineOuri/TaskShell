@@ -12,6 +12,7 @@ public class Task implements Cloneable {
     private String description;
     private TaskStatus status;
     private String date;
+    private String category;
 
     public Task() {
     }
@@ -23,6 +24,7 @@ public class Task implements Cloneable {
         this.status = TaskStatus.TODO;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         this.date = LocalDate.now().format(formatter);
+        this.category = "Other";
     }
 
      // Task with no status
@@ -31,6 +33,8 @@ public class Task implements Cloneable {
         this.description = description;
         this.date = date;
         this.status = TaskStatus.TODO;
+        this.category = "Other";
+
     }
 
     public void setNewId() {
@@ -67,6 +71,14 @@ public class Task implements Cloneable {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     @Override

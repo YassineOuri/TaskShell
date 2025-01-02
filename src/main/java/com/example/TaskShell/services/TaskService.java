@@ -26,6 +26,7 @@ import java.util.Scanner;
 public class TaskService {
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private CategoryService categoryService = new CategoryService();
 
     /**
      * Lists tasks based on the given parameters and file contents.
@@ -78,9 +79,16 @@ public class TaskService {
      * @param date        the due date of the new task
      * @param status      the status of the new task
      */
-    public void addNewTask(File file, String description, String date, String status, boolean tomorrow) {
+    public void addNewTask(File file, File categoriesFile, String description, String date, String status, boolean tomorrow, String category) {
         try (FileWriter fileWriter = new FileWriter(file, true)) {
+
             Task newTask = createTask(description, date, status, tomorrow);
+
+            if (category != null && categoryService.verifyCategory(categoriesFile, category)) {
+                newTask.setCategory(category);
+            }
+
+
 
             if (file.length() == 0) {
                 // File is empty, start a new JSON array
