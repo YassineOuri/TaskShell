@@ -45,7 +45,7 @@ public class TaskUtils {
             String checkString = task.getStatus() == TaskStatus.TODO
                     ? ANSIColors.redText("[ ]")
                     : ANSIColors.greenText("[x]");
-            output.append(String.format(" %s %s: %s%n", checkString, ANSIColors.greenText(taskCategory), task.getDescription()));
+            output.append(String.format(" %s %s: %s%n", checkString, ANSIColors.blueText(taskCategory), task.getDescription()));
         }
 
         return output;
