@@ -12,6 +12,7 @@ TaskShell is a lightweight command-line tool for managing and organizing your da
 - Move undone tasks from today to tomorrow or using any dates
 - Modify task description or status
 - Delete tasks
+- Manage Tasks Categories
 
 
 
