@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.time.DateTimeException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ import java.util.Scanner;
 public class TaskService {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private CategoryService categoryService = new CategoryService();
+    private final CategoryService categoryService = new CategoryService();
 
     /**
      * Lists tasks based on the given parameters and file contents.
@@ -142,7 +141,7 @@ public class TaskService {
                                     .filter(task -> Objects.equals(task.getDate(), DateUtils.getTodayDate()))
                                     .toList();
                         }
-                        ;
+
                     }
                     case "tomorrow" -> {
                         {
@@ -150,7 +149,7 @@ public class TaskService {
                                     .filter(task -> Objects.equals(task.getDate(), DateUtils.getTomorrowDate()))
                                     .toList();
                         }
-                        ;
+
                     }
                     default -> {
                         {
@@ -158,12 +157,10 @@ public class TaskService {
                                     .filter(task -> Objects.equals(task.getDate(), date))
                                     .toList();
                         }
-                        ;
+
                     }
                 }
             }
-
-
 
             if (tasks.isEmpty()) {
                 throw new EmptyTaskListException("No tasks found for the specified date.");
@@ -235,11 +232,7 @@ public class TaskService {
     public String updateTaskStatus(File file, String taskID, TaskStatus status) {
         try {
             List<Task> tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
-
-            Task taskToUpdate = tasks.stream()
-                    .filter(task -> Objects.equals(task.getId().toString(), taskID))
-                    .findFirst()
-                    .orElse(null);
+            Task taskToUpdate = this.getTaskByID(tasks, taskID);
 
             if (taskToUpdate == null) {
                 return "Task with ID " + taskID + " doesn't exist";
@@ -250,6 +243,25 @@ public class TaskService {
             return "Task status updated successfully";
         } catch (IOException e) {
             return "An error occurred while updating the task status";
+        }
+    }
+
+
+
+    public String updateTaskCategory(File file, String taskID, String category) {
+        try {
+            List<Task> tasks = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Task.class));
+            Task taskToUpdate = this.getTaskByID(tasks, taskID);
+
+            if (taskToUpdate == null) {
+                return "Task with ID " + taskID + " doesn't exist";
+            }
+
+            taskToUpdate.setCategory(category);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, tasks);
+            return ANSIColors.greenText("Task category updated successfully");
+        } catch (IOException e) {
+            return ANSIColors.redText("An error occurred while updating the task status");
         }
     }
 
@@ -284,5 +296,12 @@ public class TaskService {
 
     }
 
+
+    public Task getTaskByID(List<Task> tasks, String taskID) throws IOException {
+        return  tasks.stream()
+                .filter(task -> Objects.equals(task.getId().toString(), taskID))
+                .findFirst()
+                .orElse(null);
+    }
 
 }

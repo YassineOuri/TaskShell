@@ -261,7 +261,7 @@ public class TaskCommands {
         LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
 
         try {
-            List<String> categoryList =  categoryService.displayCatgeories(categoriesFile);
+            List<String> categoryList =  categoryService.displayCategories(categoriesFile);
             if(categoryList.isEmpty()) {
                 System.out.println(ANSIColors.greenText("No categories are created yet ! \n" +
                         "Create a new category using `category add`"));
@@ -293,5 +293,52 @@ public class TaskCommands {
             System.out.println(ANSIColors.redText("An error occurred while creating a new category !"));
         }
     }
+
+
+    @ShellMethod(key = "update-category", value = "Update the category of a given task ID")
+    public String updateCategory(
+            String taskID,
+            String newCategory
+    )  {
+
+        try {
+
+            if(newCategory == null) {
+                return ANSIColors.redText("Please specify a category");
+
+            }
+
+            boolean categoryVerified = categoryService.verifyCategory(categoriesFile, newCategory);
+
+            if(!categoryVerified) {
+                return ANSIColors.redText("Aborted");
+            }
+
+            return taskService.updateTaskCategory(tasksFile, taskID, newCategory);
+
+        } catch(IOException e) {
+            return ANSIColors.redText("An error occurred while updating category!");
+        }
+    }
+
+    @ShellMethod(key = "category delete", value = "Deletes a category")
+    public String deleteCategory(
+            String category
+    )  {
+        try {
+            boolean categoryDeleted = categoryService.deleteCategory(categoriesFile, category);
+            if(categoryDeleted) {
+                return ANSIColors.greenText("Category deleted successfully!");
+            }
+
+            return "";
+
+        } catch(IOException e) {
+            return ANSIColors.redText("An error occurred while deleting category!");
+        }
+    }
+
+
+
 
 }

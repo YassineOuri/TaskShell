@@ -236,3 +236,43 @@
 1735823396907:add "New Task"
 1735823412541:add "New Task" --c work
 1735823494519:list
+1737195203467:category list
+1737195493076:list --d
+1737195512851:category update 1d7a726b-ebab-4834-8a78-1ca3694be7b4 "AWS"
+1737195541206:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 hey
+1737195554005:update-category
+1737195568873:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4
+1737195705738:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 "AWS"
+1737195714952:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 "AWSS"
+1737195741322:category list
+1737195907484:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 hey
+1737196010043:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 heyhey
+1737196679690:list --d
+1737196698451:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4
+1737196858446:boolean categoryVerified = categoryService.verifyCategory(categoriesFile, newCategory);
+1737196865250:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4
+1737196905925:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 Taskshell
+1737196919246:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 AWS
+1737196923948:list
+1737196941904:list --d
+1737196957813:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 AWS
+1737196960070:ist
+1737196962487:list
+1737197014962:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 AWS
+1737197017489:list
+1737197180009:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 AWS
+1737197182247:list
+1737197202927:update-category 1d7a726b-ebab-4834-8a78-1ca3694be7b4 TaskShell
+1737197216279:list
+1737197922425:category list
+1737197934033:category delete Job,Hunting
+1737197939999:category list
+1737198322198:category delete Job,Hunting
+1737198326754:category list
+1737198401920:category add HeyHey
+1737198408222:category list
+1737198425471:category add HeyHey2
+1737198443968:category delete HeyHey2
+1737198452351:category list
+1737198471849:category delete HeyHey
+1737198477136:category list
